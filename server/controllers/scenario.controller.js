@@ -16,6 +16,21 @@ export const getScenarios = async (req, res) => {
 };
 
 /**
+ * GET /api/scenarios/:id — get a specific scenario
+ */
+export const getScenarioById = async (req, res) => {
+  try {
+    const scenario = await Scenario.findOne({ _id: req.params.id, user: req.user._id }).lean();
+    if (!scenario) {
+      return res.status(404).json({ success: false, message: 'Scenario not found.' });
+    }
+    return res.json({ success: true, data: scenario });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/**
  * POST /api/scenarios — save a new scenario
  */
 export const createScenario = async (req, res) => {

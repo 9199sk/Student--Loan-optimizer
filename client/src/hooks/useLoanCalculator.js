@@ -120,6 +120,24 @@ export function useLoanCalculator() {
   /** Clear only prepayment settings */
   const clearPrepayment = useCallback(() => setPrepayment(DEFAULT_PREPAYMENT), []);
 
+  /** Load a full saved scenario into the calculator state */
+  const loadScenario = useCallback((scenario) => {
+    if (!scenario || !scenario.loanInput) return;
+    const { loanInput, prepayment: prep } = scenario;
+    setRaw({
+      principalRaw: String(loanInput.principal ?? ''),
+      annualRateRaw: String(loanInput.annualRate ?? ''),
+      tenureYearsRaw: String((loanInput.tenureMonths ?? 0) / 12),
+      moratoriumMonthsRaw: String(loanInput.moratoriumMonths ?? 0),
+      startDate: loanInput.startDate ? new Date(loanInput.startDate).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
+    });
+    setPrepayment({
+      extraMonthly: prep?.extraMonthly ?? 0,
+      lumpSum: prep?.lumpSum ?? 0,
+      lumpSumMonth: prep?.lumpSumMonth ?? 0,
+    });
+  }, []);
+
   return {
     // Form state
     raw,
@@ -130,6 +148,7 @@ export function useLoanCalculator() {
     prepayment,
     setPrepaymentField,
     clearPrepayment,
+    loadScenario,
     prepaymentErrors,
     hasPrepayment,
     // Derived

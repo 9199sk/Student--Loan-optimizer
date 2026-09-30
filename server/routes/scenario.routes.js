@@ -1,6 +1,6 @@
 import express from 'express';
 import { body } from 'express-validator';
-import { getScenarios, createScenario, deleteScenario } from '../controllers/scenario.controller.js';
+import { getScenarios, getScenarioById, createScenario, deleteScenario } from '../controllers/scenario.controller.js';
 import { protect } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
@@ -9,6 +9,7 @@ const router = express.Router();
 router.use(protect);
 
 router.get('/', getScenarios);
+router.get('/:id', getScenarioById);
 
 router.post(
   '/',
