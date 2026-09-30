@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Calculator, Bookmark, CheckCircle2 } from 'lucide-react';
+import { Calculator, Bookmark, CheckCircle2, Download } from 'lucide-react';
 import { useLoanCalculator } from '../hooks/useLoanCalculator.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import api from '../services/api.js';
+import DashboardHero from '../components/DashboardHero.jsx';
 import LoanInputForm from '../components/LoanInputForm.jsx';
 import PrepaymentSimulator from '../components/PrepaymentSimulator.jsx';
 import LoanSummaryCards from '../components/LoanSummaryCards.jsx';
@@ -15,15 +16,20 @@ import { EmptyState } from '../components/ui.jsx';
 import RemainingBalanceChart from '../components/charts/RemainingBalanceChart.jsx';
 import PrincipalInterestChart from '../components/charts/PrincipalInterestChart.jsx';
 import CumulativeInterestChart from '../components/charts/CumulativeInterestChart.jsx';
+import { generateDebtFreeRoadmapPDF } from '../utils/pdfGenerator.js';
 
 /**
  * DashboardPage
  *
- * Main calculation dashboard with support for:
- *   - EMI calculation & prepayment simulation
- *   - Dynamic interactive charts
- *   - Saving loan scenarios (Phase 7)
- *   - Loading saved scenarios from SavedScenariosPage
+ * Professional Fintech Loan & Prepayment Optimizer Dashboard:
+ *   - Hero overview banner
+ *   - Form inputs with real-time validation & slider controls
+ *   - Interactive KPI cards & principal-vs-interest breakdown
+ *   - Prepayment impact savings highlight & comparison panel
+ *   - Dynamic Recharts financial visualizations
+ *   - Full paginated amortization table
+ *   - Printable PDF roadmap generator
+ *   - Saved scenario manager
  */
 export default function DashboardPage() {
   const {
@@ -60,9 +66,18 @@ export default function DashboardPage() {
     }
   }, [location, loadScenario, navigate]);
 
+  const handleDownloadPDF = () => {
+    if (!parsed || !results) return;
+    generateDebtFreeRoadmapPDF({
+      parsed,
+      prepayment,
+      results,
+      hasPrepayment,
+    });
+  };
+
   const handleSaveClick = () => {
     if (!user) {
-      // Redirect to login if user is not authenticated
       navigate('/login');
       return;
     }
@@ -111,25 +126,39 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* ── Page title & Save action ───────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="flex flex-col gap-5 max-w-7xl mx-auto py-2">
+      {/* ── Hero Banner ────────────────────────────────────────────────────── */}
+      <DashboardHero />
+
+      {/* ── Action Toolbar & Title ─────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/40 p-4 rounded-2xl border border-slate-800/80">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">Loan EMI & Prepayment Optimizer</h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Calculate your EMI, simulate prepayments, and see exactly how much you can save
+          <h2 className="text-lg font-bold text-slate-100">Financial Optimizer & Simulator</h2>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Adjust inputs on the left to see real-time recalculations and savings projections
           </p>
         </div>
 
-        {/* Save Scenario Button */}
+        {/* Action Buttons */}
         {isValid && results && (
-          <button
-            onClick={handleSaveClick}
-            className="btn-primary flex items-center justify-center gap-2 text-sm px-4 py-2.5 self-start sm:self-auto shrink-0 shadow-lg shadow-indigo-600/20"
-          >
-            <Bookmark size={16} />
-            <span>{user ? 'Save Scenario' : 'Login to Save Scenario'}</span>
-          </button>
+          <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0 flex-wrap">
+            <button
+              onClick={handleDownloadPDF}
+              className="btn-secondary flex items-center justify-center gap-2 text-xs py-2 px-3.5 shadow-sm border-slate-700 hover:border-slate-600"
+              title="Download Printable PDF Roadmap"
+            >
+              <Download size={15} className="text-indigo-400" />
+              <span>Download Roadmap (PDF)</span>
+            </button>
+
+            <button
+              onClick={handleSaveClick}
+              className="btn-primary flex items-center justify-center gap-2 text-xs py-2 px-3.5 shadow-md shadow-indigo-600/20"
+            >
+              <Bookmark size={15} />
+              <span>{user ? 'Save Scenario' : 'Login to Save'}</span>
+            </button>
+          </div>
         )}
       </div>
 
@@ -149,10 +178,10 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ── Main grid ──────────────────────────────────────────────────────── */}
+      {/* ── Main Dashboard Grid ────────────────────────────────────────────── */}
       <div className="grid lg:grid-cols-[360px_1fr] gap-6 items-start">
         {/* Left sidebar — sticky on desktop */}
-        <div className="flex flex-col gap-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-1">
+        <div className="flex flex-col gap-5 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:pr-1">
           <LoanInputForm
             raw={raw}
             setField={setField}
@@ -175,18 +204,18 @@ export default function DashboardPage() {
         <div className="flex flex-col gap-5 min-w-0">
           {isValid && results ? (
             <>
-              {/* KPI cards — always visible */}
+              {/* KPI Summary cards */}
               <LoanSummaryCards results={results} hasPrepayment={hasPrepayment} />
 
-              {/* Savings banner — only when there are actual savings */}
+              {/* Savings Banner — shown when prepayment saves interest */}
               {hasPrepayment && results.savings.interestSaved > 0 && (
                 <SavingsBanner savings={results.savings} />
               )}
 
-              {/* Comparison panel — only when prepayment is configured */}
+              {/* Comparison Panel */}
               {hasPrepayment && <ComparisonPanel savings={results.savings} />}
 
-              {/* Charts */}
+              {/* Recharts Visualizations */}
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
                 <div className="xl:col-span-2">
                   <RemainingBalanceChart
@@ -203,7 +232,7 @@ export default function DashboardPage() {
                 />
               </div>
 
-              {/* Amortization table — with toggle between original/prepaid */}
+              {/* Paginated Amortization Table */}
               <AmortizationTable
                 schedule={results.original.schedule}
                 scheduleAlt={hasPrepayment ? results.prepaid.schedule : null}
@@ -226,7 +255,7 @@ export default function DashboardPage() {
             <EmptyState
               icon={Calculator}
               title="Enter your loan details"
-              description="Fill in the form to calculate your EMI and see a full prepayment simulation."
+              description="Fill in the form on the left to calculate your EMI and simulate prepayments."
             />
           )}
         </div>
