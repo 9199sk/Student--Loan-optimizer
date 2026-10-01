@@ -111,12 +111,12 @@ When $\text{Balance}_i = 0$, repayment ceases immediately, reducing total tenure
 
 ## 🖼️ Screenshots
 
-| Feature | Preview |
-| :--- | :--- |
-| **Interactive Dashboard** | ![Dashboard Placeholder](https://via.placeholder.com/800x400?text=Dashboard+EMI+and+Prepayment+Simulator) |
-| **Financial Charts** | ![Charts Placeholder](https://via.placeholder.com/800x400?text=Recharts+Remaining+Balance+and+Composition) |
-| **Saved Scenarios** | ![Saved Scenarios Placeholder](https://via.placeholder.com/800x400?text=Saved+Scenario+Manager) |
-| **PDF Roadmap Export** | ![PDF Roadmap Placeholder](https://via.placeholder.com/800x400?text=Printable+PDF+Debt-Free+Roadmap) |
+| Feature | Screenshot |
+|---|---|
+| **Interactive Dashboard** | ![Dashboard](./screenshots/dashboard.png) |
+| **Financial Charts** | ![Charts](./screenshots/charts.png) |
+| **Saved Scenarios** | ![Saved Scenarios](./screenshots/scenarios.png) |
+| **PDF Roadmap Export** | ![PDF Roadmap](./screenshots/roadmap.png) |
 
 ---
 
