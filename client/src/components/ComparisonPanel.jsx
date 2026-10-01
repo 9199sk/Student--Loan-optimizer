@@ -49,7 +49,7 @@ export default function ComparisonPanel({ savings }) {
 
   return (
     <div className="card overflow-hidden">
-      {/* Header */}
+      {/* Header ****/}  
       <div className="px-5 py-4 border-b border-slate-800">
         <h3 className="text-sm font-semibold text-slate-200">Repayment Comparison</h3>
         <p className="text-xs text-slate-500 mt-0.5">Side-by-side impact of your prepayment strategy</p>
